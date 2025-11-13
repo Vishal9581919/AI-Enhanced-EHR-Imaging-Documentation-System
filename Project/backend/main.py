@@ -1,1 +1,0 @@
-from healthcare_backend_app import app
