@@ -2,121 +2,208 @@
 Assignments and projects related to AI-powered medical imaging and EHR data enhancement.
 # AI Enhanced EHR Imaging & Documentation System
 
-## Project Overview
-This repository contains assignments and projects focused on applying Artificial Intelligence and Generative AI techniques to healthcare data.  
-The main objectives are:  
-- To preprocess and analyze healthcare datasets (structured and unstructured) for AI model readiness.  
-- To enhance medical images using AI for improved diagnostic support.
+> Clinical Summarisation, MRI Insights & Patient History—powered by FastAPI, React and Hugging Face
 
 ---
 
-## Assignments Overview
+## 📌 Overview
 
-### Assignment 1: Healthcare Data EDA & Preprocessing
-**Objective:**  
-Prepare structured and unstructured healthcare datasets for AI model training and analysis.  
+This project delivers an end‑to‑end medical analysis experience that blends structured EHR text, MRI imagery and ICD‑10 intelligence. Clinicians (or analysts acting as “Guest” users) can upload notes and scans, review AI‑generated findings, export polished PDFs, and persist every encounter to a database-backed patient timeline.
 
-**Tasks Completed:**  
-- Collected and cleaned datasets: `diabetic_data.csv`, `HDHI Admission data.csv`, `healthcare-dataset-stroke-data.csv`, `unstructure mtsamples.csv`  
-- Performed Exploratory Data Analysis (EDA) with visualizations  
-- Standardized and encoded categorical variables  
-- Saved cleaned datasets and correlation/feature distribution figures  
-
-**Dataset Links:**  
-- [Diabetic Dataset](https://www.kaggle.com/datasets/sulianova/cardiovascular-disease-dataset)  
-- [HDHI Admission Dataset](https://www.kaggle.com/datasets) *(replace with actual link)*  
-- [Stroke Dataset](https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset)  
-- [MTSamples Medical Transcripts](https://www.kaggle.com/datasets/johnsmith/mtsamples)  
-
-**Files:**  
-- `Assignment_1_Healthcare_EDA/healthcare_eda_preprocessing.py`  
-- `Dataset_Info.txt` (contains dataset links and notes)
+### Core capabilities
+- **Clinical summarisation:** FastAPI orchestrates Hugging Face (or the local BART fallback) to produce rich, timestamped narratives.
+- **MRI image insights:** AI captions and enhanced imagery accompany each report and are embedded into downloads.
+- **ICD‑10 coding assistance:** Accurate suggestions arrive via the HF inference API, with a heuristic matcher on standby for offline use.
+- **Patient record keeping:** SQLite + SQLAlchemy store demographics, ICD metadata, and running summary history for every saved report.
+- **Operational dashboards:** The React frontend surfaces report history, patient rosters and management tools across dedicated views.
 
 ---
 
-### Assignment 2: GenAI Medical Image Enhancement
-**Objective:**  
-Develop a Generative AI-powered pipeline to improve medical image quality for diagnostic support.  
+## 🧭 Project Structure
 
-**Tasks Completed:**  
-- Applied denoising and sharpening using Non-Local Means (NLM), Bilateral Filter, and Unsharp Mask  
-- Implemented optional Autoencoder-based reconstruction  
-- Compared original vs enhanced images visually  
-- Computed PSNR (Peak Signal-to-Noise Ratio) and SSIM (Structural Similarity Index) for evaluation  
-
-**Dataset Links:**  
-- [Breast Ultrasound Images (BUSI) Dataset](https://www.kaggle.com/datasets/aryashah2k/breast-ultrasound-images-dataset)  
-- [Chest X-Ray Pneumonia Dataset](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)  
-
-**Files:**  
-- `Assignment_2_GenAI_Image_Enhancement/genai_image_enhancement.py`  
-- `Dataset_Info.txt` (contains dataset links and notes)
-
----
-
-## Repository Structure
-AI Enhanced EHR Imaging & Documentation System/
-│
-├── Assignment_1_Healthcare_EDA/
-│ ├── healthcare_eda_preprocessing.py
-│ ├── Dataset_Info.txt
-│
-├── Assignment_2_GenAI_Image_Enhancement/
-│ ├── genai_image_enhancement.py
-│ ├── Dataset_Info.txt
-│
-├── Future_Milestones/
-│ └── (reserved for upcoming projects)
-│
-└── README.md
-
-yaml
-Copy code
+```
+.
+├── backend/
+│   ├── healthcare_backend_app.py   # FastAPI service (patients, summaries, reports)
+│   ├── healthcare_fastapi.db       # SQLite database (generated at runtime)
+│   └── requirements.txt            # Backend dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx                 # SPA router & save workflow
+│   │   ├── components/             # Dashboards, report pages, patient management
+│   │   └── services/api.ts         # REST clients for backend endpoints
+│   ├── package.json
+│   └── vite.config.ts
+├── README.md                       # You are here
+└── .gitignore
+```
 
 ---
 
-## How to Run the Assignments
+## 🧩 Architecture
 
-1. **Clone the repository**  
+| Layer        | Technology & Notes                                                                 |
+|--------------|-------------------------------------------------------------------------------------|
+| Frontend     | React 18 + Vite + TypeScript + Tailwind-inspired custom components                 |
+| Backend      | FastAPI, SQLAlchemy ORM, SQLite (dev)                                              |
+| AI Services  | Hugging Face text generation (configurable), Transformers local fallback, html2canvas/jsPDF for PDF assembly |
+| Persistence  | `patients` & `reports` tables (auto-created); patient.extras tracks summary history |
+
+**Workflow Highlights**
+1. User enters clinical text and/or uploads an MRI image.
+2. Frontend calls `POST /api/generate-summary` to obtain narrative + ICD suggestions.
+3. “Save Report” posts the structured payload to `POST /api/report`, which:
+   - Creates the report row.
+  - Grows `patients.extra.summary_history` with the new timestamped summary.
+  - Appends the latest summary to `patients.clinical_notes`.
+4. Dashboards and Patient Management query `/api/reports` and `/api/patients`.
+5. Downloads render a white‑label PDF with headers, summaries and enhanced imagery.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Backend (FastAPI)
 ```bash
-git clone https://github.com/<your-username>/AI-Enhanced-EHR-Imaging-Documentation-System.git
-cd AI-Enhanced-EHR-Imaging-Documentation-System
-Install dependencies
-
-bash
-Copy code
+cd backend
+python -m venv venv
+venv/Scripts/activate  # or source venv/bin/activate
 pip install -r requirements.txt
-Run Assignment 1:
 
-bash
-Copy code
-python Assignment_1_Healthcare_EDA/healthcare_eda_preprocessing.py
-Run Assignment 2:
+# Optional Hugging Face configuration
+set HF_API_TOKEN=your_token_here            # Windows PowerShell
+export HF_API_TOKEN=your_token_here         # macOS/Linux
 
-bash
-Copy code
-python Assignment_2_GenAI_Image_Enhancement/genai_image_enhancement.py --method nlm
-Tech Stack
-Python 3.x
+uvicorn healthcare_backend_app:app --reload --port 7860
+# API docs: http://localhost:7860/docs
+```
 
-Pandas, NumPy, Matplotlib, Seaborn
+### 2. Frontend (React)
+```bash
+cd frontend
+npm install
+npm run dev    # http://localhost:5173
 
-PIL (Pillow), OpenCV, scikit-image
+# Provide API URL (defaults to http://localhost:7860)
+echo "VITE_API_BASE_URL=http://localhost:7860" > .env.local
+```
 
-TensorFlow / PyTorch (for Autoencoder models)
+---
 
-Author
-Vishal Kumar
-B.Tech (AI & ML) | Jagannath University, Bahadurgarh
+## 🔐 Environment Variables
 
-Future Milestones
-This folder will contain future modules and enhancements including:
+| Variable          | Purpose                                        |
+|-------------------|------------------------------------------------|
+| `HF_API_TOKEN`    | Enables hosted Hugging Face inference for ICD coding & summarisation |
+| `HF_MODEL`        | Override default model used by `hf_inference` (default: `google/gemma-2-2b-it`) |
+| `HF_ICD_MODEL`    | Optional dedicated model for ICD generation    |
+| `ICD_CSV_PATH`    | CSV file with ICD codes/descriptions (default: `ICD10codes.csv`) |
+| `EHR_CSV_PATH`    | Sample EHR CSV for enrichment (default: `Merged_EHR_Data.csv`) |
+| `DB_PATH`         | SQLAlchemy connection string (default SQLite)  |
+| `VITE_API_BASE_URL` | Frontend base URL for backend API           |
 
-Advanced AI-based image reconstruction
+If `HF_API_TOKEN` is unset, the backend gracefully falls back to local heuristics for ICD suggestions and summarisation.
 
-Predictive analytics on EHR datasets
+---
 
-Integration with real-world hospital datasets
+## 📡 API Endpoints (Backend)
+
+```
+POST   /api/generate-summary    -> run EHR + image analysis (returns text, ICD, image info)
+POST   /api/report              -> persist a report (auto-updates patient history)
+GET    /api/report/{uid}        -> fetch a single report
+GET    /api/reports             -> list reports (filter by patient_uid or doctor_name)
+DELETE /api/report/{uid}        -> remove a report
+
+POST   /api/patient             -> create patient manually
+GET    /api/patient/{uid}       -> fetch patient
+PUT    /api/patient/{uid}       -> update demographics / notes
+GET    /api/patients            -> list patients
+DELETE /api/patient/{uid}       -> delete
+
+GET    /api/patient-data/{id}   -> enrich from `Merged_EHR_Data.csv` (if present)
+POST   /api/upload-image        -> base64 helper for MRI uploads
+GET    /api/health              -> service health probe
+```
+
+**Report persistence workflow**
+- Each save call records clinical summary, ICD metadata, findings, recommendations, image captions and the raw payload.
+- `patients.extra.summary_history` keeps the most recent 50 entries, each tagged with ISO timestamp and report UID.
+- `patients.clinical_notes` accumulates an audit-friendly running log (`[timestamp] summary text`).
+
+---
+
+## 💻 Frontend Highlights
+
+- **Unified Report Page:** Displays AI findings, shows history sidebars, and exports PDF (white background, MediAI header, enhanced imaging).
+- **New Dashboard:** Uploads notes/images, syncs patient records before hitting the summary API.
+- **Patient Management:** Searchable table of saved reports with quick metrics for unique patients, totals and latest activity.
+- **Medical Dashboard:** Provides high-level stats, patient roster, MRI analysis tools, and report listings from the database.
+
+Saving is available even as a “Guest User”; named logins simply filter the history to that clinician.
+
+---
+
+## 🧪 Testing & Linting
+
+```bash
+# Backend (pytest, optional if you add tests)
+pytest
+
+# Frontend
+npm run lint
+npm run build
+```
+
+Automated suites aren’t bundled by default—add them under `backend/tests/` or `frontend/src/__tests__/` to match your workflow.
+
+---
+
+## 🗃 Data Persistence Details
+
+- **Database:** SQLite (file: `backend/healthcare_fastapi.db`). Swap `DB_PATH` for PostgreSQL/MySQL if desired.
+- **Schema:**
+  - `patients`: `patient_uid`, demographics, clinical_notes, `extra` JSON (summary history, contact info, etc.).
+  - `reports`: `report_uid`, `patient_uid`, ICD metadata, clinical summary, findings/recommendations, JSON payload snapshot.
+- **History enrichment:** Every saved report updates both tables, ensuring longitudinal context for repeat visits.
+
+---
+
+## 🛣 Roadmap Concepts
+
+- Role-based authentication & JWT protection.
+- Export options beyond PDF (HL7/FHIR, CSV).
+- Scheduled follow-up reminders based on ICD codes.
+- Automatic anomaly detection for MRI uploads (integration with CV models).
+- Replace SQLite with managed cloud DB for multi-user deployments.
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository.
+2. Create a branch: `git checkout -b feature/amazing-idea`
+3. Commit: `git commit -m "Add amazing idea"`
+4. Push: `git push origin feature/amazing-idea`
+5. Open a Pull Request with context and screenshots/logs where relevant.
+
+Issues or enhancement suggestions are welcome—file them with logs, steps to reproduce, and expected behaviour.
+
+---
+
+## 📜 License
+
+This project was developed for educational & internship purposes. Adapt it freely for internal prototypes; review institutional policies before using with real PHI/PII.
+
+---
+
+## 📞 Contact
+
+- Maintainer: Vishal Kumar  
+- Email: vishalkumar9581919@.com  
+- Stack: FastAPI · React · Hugging Face · SQLAlchemy
+
+
 
 
 
