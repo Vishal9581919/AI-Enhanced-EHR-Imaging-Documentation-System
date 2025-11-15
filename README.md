@@ -18,6 +18,11 @@ This project delivers an end‑to‑end medical analysis experience that blends 
 - **Operational dashboards:** The React frontend surfaces report history, patient rosters and management tools across dedicated views.
 
 ---
+Frontend (Live Website):
+🌐 http://vishal-healthcare-app-frontend.s3-website-us-east-1.amazonaws.com/
+
+Backend API (FastAPI on AWS Lambda):
+🔗 https://1idep65q2m.execute-api.us-east-1.amazonaws.com/prod
 
 ## 🧭 Project Structure
 
@@ -202,6 +207,7 @@ This project was developed for educational & internship purposes. Adapt it freel
 - Maintainer: Vishal Kumar  
 - Email: vishalkumar9581919@.com  
 - Stack: FastAPI · React · Hugging Face · SQLAlchemy
+
 
 
 
